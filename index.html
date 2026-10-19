@@ -88,4 +88,96 @@ textarea{min-height:80px;resize:vertical}
 (()=>{
 const PASS='arthistory2026',KEY='ah_lessons_v1';
 let admin=false;
-try{admin
+try{admin=sessionStorage.getItem('ah_admin')==='1'}catch(e){}
+const initialData=[
+  {
+    "id": "n1792396425061",
+    "type": "t",
+    "title": "Хойд Европын сэргэн мандалт эхний хэсэг",
+    "sub": "14-р зуунаас 15-р зуун",
+    "video": "https://youtu.be/3lP2uLEPTws?si=z41QqAHtmvyIhFDz",
+    "img": "",
+    "notes": "Сэргэн мандалт нь Итали улс, ялангуяа Флоренц хотод төвтэй урлагийн хөгжил байсан.",
+    "cites": "1. Adams, Laurie Schneider. A History of Western Art. 5th ed. New York: McGraw-Hill, 2011.",
+    "h": 179
+  },
+  {
+    "id": "n1792396583425",
+    "type": "t",
+    "title": "Хойд Европын сэргэн мандалт хоёрдугаар хэсэг",
+    "sub": "14-р зуунаас 15-р зуун",
+    "video": "https://youtu.be/A1KKwFQyZGw?si=8IwI5C71yT08QiCZ",
+    "img": "",
+    "notes": "Сэргэн мандалт нь Итали улс, ялангуяа Флоренц хотод төвтэй урлагийн хөгжил байсан.",
+    "cites": "1. Adams, Laurie Schneider. A History of Western Art. 5th ed. New York: McGraw-Hill, 2011.",
+    "h": 134
+  },
+  {id:'b1',type:'b',title:'Феминизм',sub:'Феминист урлагийн түүх',video:'',notes:'Урлагийн түүхийн канонд эмэгтэйчүүд яагаад харагдахгүй байсныг феминист шүүмжлэл асуудаг.',cites:'Nochlin, Linda. “Why Have There Been No Great Women Artists?” ARTnews 69, no. 9 (1971): 22–39.'},
+  {id:'b2',type:'b',title:'Марксизм',sub:'Урлаг ба нийгмийн харилцаа',video:'',notes:'Урлагийг үйлдвэрлэлийн харилцаа, анги, үзэл суртлын хүрээнд тайлбарладаг онол.',cites:'Berger, John. Ways of Seeing. London: BBC and Penguin, 1972.\nClark, T. J. Image of the People. London: Thames & Hudson, 1973.'},
+  {id:'b3',type:'b',title:'Пьер Бурдье',sub:'Тоо, амт, соёлын капитал',video:'',notes:'Урлагийн амт сонирхол нийгмийн байр суурийг хэрхэн ялган тэмдэглэдгийг Бурдье тайлбарласан.',cites:'Bourdieu, Pierre. Distinction: A Social Critique of the Judgement of Taste. Cambridge, MA: Harvard University Press, 1984.'},
+  {id:'b4',type:'b',title:'Пост-колониализм',sub:'Сайд, Бабха',video:'',notes:'',cites:''}
+];
+const clone=a=>JSON.parse(JSON.stringify(a));
+function load(){let d=null;if(admin){try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}}return Array.isArray(d)?d:clone(initialData)}
+let L=load();
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){alert('Хадгалах зай дүүрсэн байна. Жижиг зураг ашиглана уу.')}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ready=x=>!!(x.video||x.notes);
+const thumb=x=>{if(x.img)return x.img;const m=String(x.video||'').match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);return m?'https://img.youtube.com/vi/'+m[1]+'/hqdefault.jpg':''};
+const st=x=>ready(x)?'<span class="st">Үзэх</span>':'<span class="st soon">Удахгүй</span>';
+const delBtn=id=>`<span class="del adm" role="button" tabindex="0" data-del="${id}" aria-label="Усгах">Усгах</span>`;
+const temple='<svg viewBox="0 0 40 40" fill="none" stroke="#B59B63" stroke-width="1.5"><path d="M4 14 20 5l16 9zM9 18v14M16 18v14M24 18v14M31 18v14M4 35h32"/></svg>';
+const COL=[['#4a1212','#d4af37'],['#1f2e1f','#d4af37'],['#171717','#F5EBE0'],['#d9cdb8','#171717'],['#2c1d11','#d9cdb8']];
+function render(){
+document.body.classList.toggle('admin',admin);
+const T=L.filter(x=>x.type==='t'),B=L.filter(x=>x.type==='b');
+$('#wall').innerHTML=T.length?T.map(f=>`<div class="fr" data-id="${f.id}" tabindex="0" role="button">${delBtn(f.id)}<div class="frame"><div class="art" data-img="${esc(thumb(f))}" style="background-image:radial-gradient(ellipse at 30% 25%,hsl(${f.h||30} 35% 38%),hsl(${(f.h||30)+25} 30% 14%) 80%)">${thumb(f)?'':temple}</div></div><div class="plate"><b>${esc(f.title)}</b><small>${esc(f.sub)}</small>${st(f)}</div></div>`).join(''):'<p class="empty">Хичээл алга.</p>';
+document.querySelectorAll('.art[data-img]').forEach(a=>{if(a.dataset.img)a.style.backgroundImage='url('+JSON.stringify(a.dataset.img)+')'});
+let h='';for(let i=0;i<B.length;i+=5){h+='<div class="stack">'+B.slice(i,i+5).map((b,j)=>{const c=COL[(i+j)%5],k=i+j;return `<button class="bk" data-id="${b.id}" style="background:linear-gradient(#ffffff10,#0000002a),${c[0]};color:${c[1]};width:${280+(k%3)*34}px;margin-left:${((k*37)%5-2)*9}px">${delBtn(b.id)}<b>${esc(b.title)}</b><small>${esc(b.sub)} ${ready(b)?'• Үзэх':'• Удахгүй'}</small></button>`}).join('')+'</div>'}
+$('#shelf').innerHTML=h||'<p class="empty">Ном алга.</p>';}
+function embed(u){if(!u)return'<span>Видео удахгүй</span>';
+const m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+if(m)return`<iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen title="Видео"></iframe>`;
+if(/\.(mp4|webm)(\?|$)/i.test(u))return`<video controls src="${esc(u)}"></video>`;
+return`<a href="${esc(u)}" target="_blank" rel="noopener">Видео нээх</a>`}
+function modal(html){close();const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="md" role="dialog" aria-modal="true">${html}</div>`;o.onclick=e=>{if(e.target===o)close()};document.body.appendChild(o);const f=o.querySelector('input,button');if(f)f.focus();return o}
+function close(){document.querySelectorAll('.ov').forEach(o=>o.remove())}
+function open(id){const x=L.find(l=>l.id===id);if(!x)return;
+const cl=Array.isArray(x.cites)?x.cites:String(x.cites||'').split('\n');const cites=cl.some(s=>s.trim())?'<ol>'+cl.filter(s=>s.trim()).map(s=>'<li>'+esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')+'</li>').join('')+'</ol>':'<p style="opacity:.6">Удахгүй нэмэгдэнэ.</p>';
+const o=modal(`<h3>${esc(x.title)}</h3><div class="meta">${x.type==='t'?'Цаг хугацааны дараалал':'Онол'} • ${esc(x.sub)}</div><div class="vid">${embed(x.video)}</div><h4>Тойм</h4><p>${esc(x.notes)||'<span style="opacity:.6">Удахгүй нэмэгдэнэ.</span>'}</p><h4>Эх сурвалж</h4>${cites}<div class="acts"><button class="danger adm" id="mdel">Усгах</button><button id="mclose">Хаах</button></div>`);
+o.querySelector('#mclose').onclick=close;o.querySelector('#mdel').onclick=()=>del(id)}
+function del(id){if(!admin)return;if(!confirm('Та энэ хичээлийг устгахдаа итгэлтэй байна уу?'))return;L=L.filter(l=>l.id!==id);save();close();render()}
+function login(){const o=modal(`<h3>Админ нэвтрэх</h3><label for="pw">Админ нууц үгээ оруулна уу:</label><input id="pw" type="password" autocomplete="off"><p id="err" style="color:#d9a0a0;font-size:13px;margin:8px 0 0"></p><div class="acts"><button id="c">Болих</button><button id="ok">Нэвтрэх</button></div>`);
+const go=()=>{if(o.querySelector('#pw').value===PASS){admin=true;try{sessionStorage.setItem('ah_admin','1')}catch(e){}L=load();close();render()}else o.querySelector('#err').textContent='Нууц үг буруу байна.'};
+o.querySelector('#ok').onclick=go;o.querySelector('#c').onclick=close;o.querySelector('#pw').onkeydown=e=>{if(e.key==='Enter')go()}}
+function add(){if(!admin)return;const o=modal(`<h3>Хичээл нэмэх</h3>
+<label for="a1">Гарчиг</label><input id="a1">
+<label for="a2">Төрөл</label><select id="a2"><option value="t">Цаг хугацааны үе</option><option value="b">Онол</option></select>
+<label for="a3">Үе / зохиогч</label><input id="a3">
+<label for="a4">YouTube холбоос эсвэл MP4</label><input id="a4" type="url">
+<label for="a8">Зураг оруулах (төхөөрөмжөөс)</label><input id="a8" type="file" accept="image/*">
+<label for="a5">Эсвэл зургийн холбоос (заавал биш)</label><input id="a5" type="url">
+<label for="a6">Хичээлийн тойм</label><textarea id="a6"></textarea>
+<label for="a7">Эх сурвалж (мөр бүрт нэг)</label><textarea id="a7"></textarea>
+<div class="acts"><button id="c">Болих</button><button id="ok">Нийтлэх</button></div>`);
+o.querySelector('#c').onclick=close;
+o.querySelector('#ok').onclick=()=>{const v=i=>o.querySelector('#a'+i).value.trim();if(!v(1)){o.querySelector('#a1').focus();return}
+const y=v(4).match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+const fin=img=>{L.push({id:'n'+Date.now(),type:v(2),title:v(1),sub:v(3),video:v(4),img:img||v(5)||(y?'https://img.youtube.com/vi/'+y[1]+'/hqdefault.jpg':''),notes:v(6),cites:v(7),h:Math.floor(Math.random()*360)});save();close();render()};
+const f=o.querySelector('#a8').files[0];
+if(!f){fin('');return}
+const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);fin(c.toDataURL('image/jpeg',.85))};im.onerror=()=>fin(r.result);im.src=r.result};r.readAsDataURL(f)}}
+$('#login').onclick=login;$('#addBtn').onclick=add;
+$('#logout').onclick=()=>{admin=false;try{sessionStorage.removeItem('ah_admin')}catch(e){}L=load();render()};
+$('#exp').onclick=()=>{if(!admin)return;const t=JSON.stringify(L,null,2);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>alert('Хуулагдлаа. index.html доторх initialData=[ ... ] жагсаалтыг үүгээр солино уу.')).catch(()=>prompt('Хуулна уу:',t))};
+$('#imp').onclick=()=>{if(!admin)return;const o=modal(`<h3>Импорт</h3><label for="ij">JSON кодоо буулгана уу</label><textarea id="ij" style="min-height:200px"></textarea><p id="ie" style="color:#d9a0a0;font-size:13px"></p><div class="acts"><button id="c">Болих</button><button id="ok">Оруулах</button></div>`);o.querySelector('#c').onclick=close;o.querySelector('#ok').onclick=()=>{try{const a=JSON.parse(o.querySelector('#ij').value);if(!Array.isArray(a))throw 0;L=a;save();close();render()}catch(e){o.querySelector('#ie').textContent='Код буруу байна.'}}};
+$('#rst').onclick=()=>{if(!admin||!confirm('Хадгалсан өөрчлөлтийг арилгаад, кодонд байгаа үндсэн жагсаалтыг сэргээх үү?'))return;try{localStorage.removeItem(KEY)}catch(e){}L=clone(initialData);render()};
+document.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();del(d.dataset.del);return}const i=e.target.closest('[data-id]');if(i)open(i.dataset.id)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close();
+if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();if(!admin)login()}
+if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('fr'))open(e.target.dataset.id)});
+window.go=id=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+render();
+})();
+</script></body></html>
