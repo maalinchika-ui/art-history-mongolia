@@ -39,6 +39,7 @@ section{padding:50px 5vw 20px}
 .st{font-size:11px;color:var(--brass)}.st.soon{opacity:.5;color:var(--cream)}
 .del{position:absolute;top:-8px;right:-8px;z-index:3;background:#2a0e0e;padding:4px 9px;font-size:12px;opacity:0;transition:opacity .2s}
 .fr:hover .del,.bk:hover .del,.del:focus-visible{opacity:1}
+.edt{right:60px;background:#1d1a10}
 /* books */
 #shelf{display:flex;gap:56px;align-items:flex-end;overflow-x:auto;padding:30px 40px 0;justify-content:center;min-height:200px}
 .stack{display:flex;flex-direction:column-reverse;flex:none}
@@ -70,7 +71,8 @@ input,select,textarea{width:100%;font:inherit;color:var(--cream);background:#0f0
 textarea{min-height:80px;resize:vertical}
 @media(max-width:600px){.bk{padding:0 32px}.bk b{font-size:17px}.bk::before{left:10px}.bk::after{right:10px}#shelf{justify-content:flex-start;padding-inline:16px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
-</style></head><body>
+</style><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.js"></script>
+</head><body>
 <header>
 <h1>Урлагийн түүхийн боловсрол</h1>
 <nav>
@@ -86,56 +88,54 @@ textarea{min-height:80px;resize:vertical}
 <footer><span>Эх сурвалж ба Ном зүй: хичээл бүрийн дотор</span><span>Үнэгүй нээлттэй боловсролын платформ <button id="login">Админ нэвтрэх</button></span></footer>
 <script>
 (()=>{
-const PASS='arthistory2026',KEY='ah_lessons_v1';
+/* SUPABASE: Project URL болон anon (publishable) key-ээ энд буулгана. Хоосон бол сайт доорх initialData-г ашиглана. */
+const SB_URL='',SB_KEY='',ADMIN_EMAIL='';
+const sb=(SB_URL&&SB_KEY&&window.supabase)?window.supabase.createClient(SB_URL,SB_KEY):null;
+const PASS='demo-only-1234',KEY='ah_lessons_v1';
 let admin=false;
 try{admin=sessionStorage.getItem('ah_admin')==='1'}catch(e){}
+if(sb)admin=false;
 const initialData=[
-  {
-    "id": "n1792396425061",
-    "type": "t",
-    "title": "Хойд Европын сэргэн мандалт эхний хэсэг",
-    "sub": "14-р зуунаас 15-р зуун",
-    "video": "https://youtu.be/3lP2uLEPTws?si=z41QqAHtmvyIhFDz",
-    "img": "",
-    "notes": "Сэргэн мандалт нь Итали улс, ялангуяа Флоренц хотод төвтэй урлагийн хөгжил байсан.",
-    "cites": "1. Adams, Laurie Schneider. A History of Western Art. 5th ed. New York: McGraw-Hill, 2011.",
-    "h": 179
-  },
-  {
-    "id": "n1792396583425",
-    "type": "t",
-    "title": "Хойд Европын сэргэн мандалт хоёрдугаар хэсэг",
-    "sub": "14-р зуунаас 15-р зуун",
-    "video": "https://youtu.be/A1KKwFQyZGw?si=8IwI5C71yT08QiCZ",
-    "img": "",
-    "notes": "Сэргэн мандалт нь Итали улс, ялангуяа Флоренц хотод төвтэй урлагийн хөгжил байсан.",
-    "cites": "1. Adams, Laurie Schneider. A History of Western Art. 5th ed. New York: McGraw-Hill, 2011.",
-    "h": 134
-  },
-  {id:'b1',type:'b',title:'Феминизм',sub:'Феминист урлагийн түүх',video:'',notes:'Урлагийн түүхийн канонд эмэгтэйчүүд яагаад харагдахгүй байсныг феминист шүүмжлэл асуудаг.',cites:'Nochlin, Linda. “Why Have There Been No Great Women Artists?” ARTnews 69, no. 9 (1971): 22–39.'},
-  {id:'b2',type:'b',title:'Марксизм',sub:'Урлаг ба нийгмийн харилцаа',video:'',notes:'Урлагийг үйлдвэрлэлийн харилцаа, анги, үзэл суртлын хүрээнд тайлбарладаг онол.',cites:'Berger, John. Ways of Seeing. London: BBC and Penguin, 1972.\nClark, T. J. Image of the People. London: Thames & Hudson, 1973.'},
-  {id:'b3',type:'b',title:'Пьер Бурдье',sub:'Тоо, амт, соёлын капитал',video:'',notes:'Урлагийн амт сонирхол нийгмийн байр суурийг хэрхэн ялган тэмдэглэдгийг Бурдье тайлбарласан.',cites:'Bourdieu, Pierre. Distinction: A Social Critique of the Judgement of Taste. Cambridge, MA: Harvard University Press, 1984.'},
-  {id:'b4',type:'b',title:'Пост-колониализм',sub:'Сайд, Бабха',video:'',notes:'',cites:''}
-];
+/* ЗАГВАР: доорх мөрийг хуулж, өөрийн хичээлээр солиод жагсаалтад нэмнэ үү. Мөр бүрийн төгсгөлд таслал (,) тавина.
+type: 't' = цаг хугацааны дараалал (зураг), 'b' = онол (ном). id бүр давхцахгүй байх ёстой.
+img хоосон бол YouTube-ийн зураг автоматаар орно. Өөрийн зураг бол img:'img/нэр.jpg' гэж бичээд зургаа GitHub дээр img хавтсанд хийнэ.
+{id:'x1',type:'t',title:'Гарчиг',sub:'Үе • Зохиогч',video:'https://www.youtube.com/watch?v=XXXXXXXXXXX',img:'',notes:'Хичээлийн тойм',cites:['Эх сурвалж 1','Эх сурвалж 2']},
+*/
+{id:'s1',type:'t',title:'Умард Ренессанс',sub:'XV–XVI зуун • Ян ван Эйк',h:8,video:'',notes:'Нидерланд, Фландрийн зураачид тосон будгийн нарийн техникээр бодит байдлыг зураг дээр шингээсэн үе. Ян ван Эйкийн хөрөг, гэрэл, материаллаг байдлын дүрслэл гол сэдэв.',cites:'Panofsky, Erwin. Early Netherlandish Painting. Cambridge, MA: Harvard University Press, 1953.\nCampbell, Lorne. The Fifteenth Century Netherlandish Paintings. London: National Gallery, 1998.'},
+{id:'s2',type:'t',title:'Италийн Ренессанс',sub:'XIV–XVI зуун • Леонардо да Винчи',h:40,video:'',notes:'Хүмүүнлэгийн үзэл, шугаман перспектив, анатоми судлал, эртний сонгодог өвийг сэргээсэн үе.',cites:'Burckhardt, Jacob. The Civilization of the Renaissance in Italy. 1860.\nBaxandall, Michael. Painting and Experience in Fifteenth-Century Italy. Oxford: Oxford University Press, 1972.\nGombrich, E. H. The Story of Art. London: Phaidon, 1950.'},
+{id:'s3',type:'t',title:'Дорнод урлагийн түүх',sub:'Укиё-э • Хокусай',h:210,video:'',notes:'',cites:''},
+{id:'s4',type:'t',title:'Монгол урлагийн түүх',sub:'Монгол зураг, уламжлал',h:25,video:'',notes:'',cites:''},
+{id:'b1',type:'b',title:'Феминизм',sub:'Феминист урлагийн түүх',video:'',notes:'Урлагийн түүхийн канонд эмэгтэйчүүд яагаад харагдахгүй байсныг феминист шүүмжлэл асуудаг.',cites:'Nochlin, Linda. “Why Have There Been No Great Women Artists?” ARTnews 69, no. 9 (1971): 22–39.'},
+{id:'b2',type:'b',title:'Марксизм',sub:'Урлаг ба нийгмийн харилцаа',video:'',notes:'Урлагийг үйлдвэрлэлийн харилцаа, анги, үзэл суртлын хүрээнд тайлбарладаг онол.',cites:'Berger, John. Ways of Seeing. London: BBC and Penguin, 1972.\nClark, T. J. Image of the People. London: Thames & Hudson, 1973.'},
+{id:'b3',type:'b',title:'Пьер Бурдье',sub:'Тоо, амт, соёлын капитал',video:'',notes:'Урлагийн амт сонирхол нийгмийн байр суурийг хэрхэн ялган тэмдэглэдгийг Бурдье тайлбарласан.',cites:'Bourdieu, Pierre. Distinction: A Social Critique of the Judgement of Taste. Cambridge, MA: Harvard University Press, 1984.'},
+{id:'b4',type:'b',title:'Пост-колониализм',sub:'Сайд, Бабха',video:'',notes:'',cites:''}];
 const clone=a=>JSON.parse(JSON.stringify(a));
 function load(){let d=null;if(admin){try{d=JSON.parse(localStorage.getItem(KEY))}catch(e){}}return Array.isArray(d)?d:clone(initialData)}
-let L=load();
+let L=sb?[]:load(),busy=!!sb;
+const row=x=>({id:x.id,type:x.type,title:x.title,sub:x.sub||'',video:x.video||'',img:x.img||'',notes:x.notes||'',cites:Array.isArray(x.cites)?x.cites.join('\n'):(x.cites||''),h:x.h||0});
+const FAIL='Хадгалж чадсангүй. Дахин нэвтэрнэ үү.';
+async function pull(){try{const{data,error}=await sb.from('lessons').select('*').order('created_at').order('id');if(error)throw error;L=data}catch(e){L=clone(initialData)}busy=false;render()}
+async function persist(x){if(!sb){save();return}const{error}=await sb.from('lessons').upsert(row(x));if(error){alert(FAIL);pull()}}
+async function pushAll(a){const{error}=await sb.from('lessons').upsert(a.map(row));if(error)alert(FAIL)}
+async function loginSB(){const o=modal(`<h3>Админ нэвтрэх</h3><label for="pw">Админ нууц үгээ оруулна уу:</label><input id="pw" type="password" autocomplete="current-password"><p id="err" style="color:#d9a0a0;font-size:13px;margin:8px 0 0"></p><div class="acts"><button id="c">Болих</button><button id="ok">Нэвтрэх</button></div>`);
+const go=async()=>{const{error}=await sb.auth.signInWithPassword({email:ADMIN_EMAIL,password:o.querySelector('#pw').value});if(error)o.querySelector('#err').textContent='Нууц үг буруу байна.';else close()};
+o.querySelector('#ok').onclick=go;o.querySelector('#c').onclick=close;o.querySelector('#pw').onkeydown=e=>{if(e.key==='Enter')go()}}
 const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){alert('Хадгалах зай дүүрсэн байна. Жижиг зураг ашиглана уу.')}};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ready=x=>!!(x.video||x.notes);
 const thumb=x=>{if(x.img)return x.img;const m=String(x.video||'').match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);return m?'https://img.youtube.com/vi/'+m[1]+'/hqdefault.jpg':''};
 const st=x=>ready(x)?'<span class="st">Үзэх</span>':'<span class="st soon">Удахгүй</span>';
-const delBtn=id=>`<span class="del adm" role="button" tabindex="0" data-del="${id}" aria-label="Усгах">Усгах</span>`;
+const delBtn=id=>`<span class="del edt adm" role="button" tabindex="0" data-edit="${id}" aria-label="Засах">Засах</span><span class="del adm" role="button" tabindex="0" data-del="${id}" aria-label="Усгах">Усгах</span>`;
 const temple='<svg viewBox="0 0 40 40" fill="none" stroke="#B59B63" stroke-width="1.5"><path d="M4 14 20 5l16 9zM9 18v14M16 18v14M24 18v14M31 18v14M4 35h32"/></svg>';
 const COL=[['#4a1212','#d4af37'],['#1f2e1f','#d4af37'],['#171717','#F5EBE0'],['#d9cdb8','#171717'],['#2c1d11','#d9cdb8']];
 function render(){
 document.body.classList.toggle('admin',admin);
 const T=L.filter(x=>x.type==='t'),B=L.filter(x=>x.type==='b');
-$('#wall').innerHTML=T.length?T.map(f=>`<div class="fr" data-id="${f.id}" tabindex="0" role="button">${delBtn(f.id)}<div class="frame"><div class="art" data-img="${esc(thumb(f))}" style="background-image:radial-gradient(ellipse at 30% 25%,hsl(${f.h||30} 35% 38%),hsl(${(f.h||30)+25} 30% 14%) 80%)">${thumb(f)?'':temple}</div></div><div class="plate"><b>${esc(f.title)}</b><small>${esc(f.sub)}</small>${st(f)}</div></div>`).join(''):'<p class="empty">Хичээл алга.</p>';
+$('#wall').innerHTML=T.length?T.map(f=>`<div class="fr" data-id="${f.id}" tabindex="0" role="button">${delBtn(f.id)}<div class="frame"><div class="art" data-img="${esc(thumb(f))}" style="background-image:radial-gradient(ellipse at 30% 25%,hsl(${f.h||30} 35% 38%),hsl(${(f.h||30)+25} 30% 14%) 80%)">${thumb(f)?'':temple}</div></div><div class="plate"><b>${esc(f.title)}</b><small>${esc(f.sub)}</small>${st(f)}</div></div>`).join(''):`<p class="empty">${busy?'Ачаалж байна…':'Хичээл алга.'}</p>`;
 document.querySelectorAll('.art[data-img]').forEach(a=>{if(a.dataset.img)a.style.backgroundImage='url('+JSON.stringify(a.dataset.img)+')'});
 let h='';for(let i=0;i<B.length;i+=5){h+='<div class="stack">'+B.slice(i,i+5).map((b,j)=>{const c=COL[(i+j)%5],k=i+j;return `<button class="bk" data-id="${b.id}" style="background:linear-gradient(#ffffff10,#0000002a),${c[0]};color:${c[1]};width:${280+(k%3)*34}px;margin-left:${((k*37)%5-2)*9}px">${delBtn(b.id)}<b>${esc(b.title)}</b><small>${esc(b.sub)} ${ready(b)?'• Үзэх':'• Удахгүй'}</small></button>`}).join('')+'</div>'}
-$('#shelf').innerHTML=h||'<p class="empty">Ном алга.</p>';}
+$('#shelf').innerHTML=h||`<p class="empty">${busy?'Ачаалж байна…':'Ном алга.'}</p>`;}
 function embed(u){if(!u)return'<span>Видео удахгүй</span>';
 const m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
 if(m)return`<iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen title="Видео"></iframe>`;
@@ -145,13 +145,15 @@ function modal(html){close();const o=document.createElement('div');o.className='
 function close(){document.querySelectorAll('.ov').forEach(o=>o.remove())}
 function open(id){const x=L.find(l=>l.id===id);if(!x)return;
 const cl=Array.isArray(x.cites)?x.cites:String(x.cites||'').split('\n');const cites=cl.some(s=>s.trim())?'<ol>'+cl.filter(s=>s.trim()).map(s=>'<li>'+esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')+'</li>').join('')+'</ol>':'<p style="opacity:.6">Удахгүй нэмэгдэнэ.</p>';
-const o=modal(`<h3>${esc(x.title)}</h3><div class="meta">${x.type==='t'?'Цаг хугацааны дараалал':'Онол'} • ${esc(x.sub)}</div><div class="vid">${embed(x.video)}</div><h4>Тойм</h4><p>${esc(x.notes)||'<span style="opacity:.6">Удахгүй нэмэгдэнэ.</span>'}</p><h4>Эх сурвалж</h4>${cites}<div class="acts"><button class="danger adm" id="mdel">Усгах</button><button id="mclose">Хаах</button></div>`);
-o.querySelector('#mclose').onclick=close;o.querySelector('#mdel').onclick=()=>del(id)}
-function del(id){if(!admin)return;if(!confirm('Та энэ хичээлийг устгахдаа итгэлтэй байна уу?'))return;L=L.filter(l=>l.id!==id);save();close();render()}
-function login(){const o=modal(`<h3>Админ нэвтрэх</h3><label for="pw">Админ нууц үгээ оруулна уу:</label><input id="pw" type="password" autocomplete="off"><p id="err" style="color:#d9a0a0;font-size:13px;margin:8px 0 0"></p><div class="acts"><button id="c">Болих</button><button id="ok">Нэвтрэх</button></div>`);
+const o=modal(`<h3>${esc(x.title)}</h3><div class="meta">${x.type==='t'?'Цаг хугацааны дараалал':'Онол'} • ${esc(x.sub)}</div><div class="vid">${embed(x.video)}</div><h4>Тойм</h4><p>${esc(x.notes)||'<span style="opacity:.6">Удахгүй нэмэгдэнэ.</span>'}</p><h4>Эх сурвалж</h4>${cites}<div class="acts"><button class="adm" id="medit">Засах</button><button class="danger adm" id="mdel">Усгах</button><button id="mclose">Хаах</button></div>`);
+o.querySelector('#mclose').onclick=close;o.querySelector('#mdel').onclick=()=>del(id);o.querySelector('#medit').onclick=()=>add(x)}
+function del(id){if(!admin)return;if(!confirm('Та энэ хичээлийг устгахдаа итгэлтэй байна уу?'))return;const old=L;L=L.filter(l=>l.id!==id);close();render();if(!sb){save();return}
+sb.from('lessons').delete().eq('id',id).select().then(({data,error})=>{if(error||!data.length){L=old;render();alert('Устгаж чадсангүй. Дахин нэвтэрнэ үү.')}})}
+function login(){if(sb)return loginSB();const o=modal(`<h3>Админ нэвтрэх</h3><label for="pw">Админ нууц үгээ оруулна уу:</label><input id="pw" type="password" autocomplete="off"><p id="err" style="color:#d9a0a0;font-size:13px;margin:8px 0 0"></p><div class="acts"><button id="c">Болих</button><button id="ok">Нэвтрэх</button></div>`);
 const go=()=>{if(o.querySelector('#pw').value===PASS){admin=true;try{sessionStorage.setItem('ah_admin','1')}catch(e){}L=load();close();render()}else o.querySelector('#err').textContent='Нууц үг буруу байна.'};
 o.querySelector('#ok').onclick=go;o.querySelector('#c').onclick=close;o.querySelector('#pw').onkeydown=e=>{if(e.key==='Enter')go()}}
-function add(){if(!admin)return;const o=modal(`<h3>Хичээл нэмэх</h3>
+function add(x){if(!admin)return;const e=!!x;x=x||{};
+const o=modal(`<h3>${e?'Хичээл засах':'Хичээл нэмэх'}</h3>
 <label for="a1">Гарчиг</label><input id="a1">
 <label for="a2">Төрөл</label><select id="a2"><option value="t">Цаг хугацааны үе</option><option value="b">Онол</option></select>
 <label for="a3">Үе / зохиогч</label><input id="a3">
@@ -159,25 +161,27 @@ function add(){if(!admin)return;const o=modal(`<h3>Хичээл нэмэх</h3>
 <label for="a8">Зураг оруулах (төхөөрөмжөөс)</label><input id="a8" type="file" accept="image/*">
 <label for="a5">Эсвэл зургийн холбоос (заавал биш)</label><input id="a5" type="url">
 <label for="a6">Хичээлийн тойм</label><textarea id="a6"></textarea>
-<label for="a7">Эх сурвалж (мөр бүрт нэг)</label><textarea id="a7"></textarea>
-<div class="acts"><button id="c">Болих</button><button id="ok">Нийтлэх</button></div>`);
+<label for="a7">Эх сурвалж (мөр бүрт нэг, Chicago хэлбэрээр)</label><textarea id="a7"></textarea>
+<div class="acts"><button id="c">Болих</button><button id="ok">${e?'Хадгалах':'Нийтлэх'}</button></div>`);
+const q=i=>o.querySelector('#a'+i),own=!!(x.img&&x.img.startsWith('data:'));
+q(1).value=x.title||'';q(2).value=x.type||'t';q(3).value=x.sub||'';q(4).value=x.video||'';q(5).value=own?'':(x.img||'');q(6).value=x.notes||'';q(7).value=Array.isArray(x.cites)?x.cites.join('\n'):(x.cites||'');
 o.querySelector('#c').onclick=close;
-o.querySelector('#ok').onclick=()=>{const v=i=>o.querySelector('#a'+i).value.trim();if(!v(1)){o.querySelector('#a1').focus();return}
+o.querySelector('#ok').onclick=()=>{const v=i=>q(i).value.trim();if(!v(1)){q(1).focus();return}
 const y=v(4).match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
-const fin=img=>{L.push({id:'n'+Date.now(),type:v(2),title:v(1),sub:v(3),video:v(4),img:img||v(5)||(y?'https://img.youtube.com/vi/'+y[1]+'/hqdefault.jpg':''),notes:v(6),cites:v(7),h:Math.floor(Math.random()*360)});save();close();render()};
-const f=o.querySelector('#a8').files[0];
-if(!f){fin('');return}
+const fin=img=>{const item={id:e?x.id:'n'+Date.now(),type:v(2),title:v(1),sub:v(3),video:v(4),img:img||v(5)||(own?x.img:'')||(y?'https://img.youtube.com/vi/'+y[1]+'/hqdefault.jpg':''),notes:v(6),cites:v(7),h:e?x.h:Math.floor(Math.random()*360)};
+if(e)L=L.map(l=>l.id===x.id?item:l);else L.push(item);persist(item);close();render()};
+const f=q(8).files[0];if(!f){fin('');return}
 const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);fin(c.toDataURL('image/jpeg',.85))};im.onerror=()=>fin(r.result);im.src=r.result};r.readAsDataURL(f)}}
-$('#login').onclick=login;$('#addBtn').onclick=add;
-$('#logout').onclick=()=>{admin=false;try{sessionStorage.removeItem('ah_admin')}catch(e){}L=load();render()};
+$('#login').onclick=login;$('#addBtn').onclick=()=>add();
+$('#logout').onclick=()=>{if(sb)sb.auth.signOut();else{admin=false;try{sessionStorage.removeItem('ah_admin')}catch(e){}L=load();render()}};
 $('#exp').onclick=()=>{if(!admin)return;const t=JSON.stringify(L,null,2);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>alert('Хуулагдлаа. index.html доторх initialData=[ ... ] жагсаалтыг үүгээр солино уу.')).catch(()=>prompt('Хуулна уу:',t))};
-$('#imp').onclick=()=>{if(!admin)return;const o=modal(`<h3>Импорт</h3><label for="ij">JSON кодоо буулгана уу</label><textarea id="ij" style="min-height:200px"></textarea><p id="ie" style="color:#d9a0a0;font-size:13px"></p><div class="acts"><button id="c">Болих</button><button id="ok">Оруулах</button></div>`);o.querySelector('#c').onclick=close;o.querySelector('#ok').onclick=()=>{try{const a=JSON.parse(o.querySelector('#ij').value);if(!Array.isArray(a))throw 0;L=a;save();close();render()}catch(e){o.querySelector('#ie').textContent='Код буруу байна.'}}};
-$('#rst').onclick=()=>{if(!admin||!confirm('Хадгалсан өөрчлөлтийг арилгаад, кодонд байгаа үндсэн жагсаалтыг сэргээх үү?'))return;try{localStorage.removeItem(KEY)}catch(e){}L=clone(initialData);render()};
-document.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();del(d.dataset.del);return}const i=e.target.closest('[data-id]');if(i)open(i.dataset.id)});
+$('#imp').onclick=()=>{if(!admin)return;const o=modal(`<h3>Импорт</h3><label for="ij">JSON кодоо буулгана уу</label><textarea id="ij" style="min-height:200px"></textarea><p id="ie" style="color:#d9a0a0;font-size:13px"></p><div class="acts"><button id="c">Болих</button><button id="ok">Оруулах</button></div>`);o.querySelector('#c').onclick=close;o.querySelector('#ok').onclick=()=>{try{const a=JSON.parse(o.querySelector('#ij').value);if(!Array.isArray(a))throw 0;L=a;if(sb)pushAll(a);else save();close();render()}catch(e){o.querySelector('#ie').textContent='Код буруу байна.'}}};
+$('#rst').onclick=()=>{if(!admin||!confirm('Хадгалсан өөрчлөлтийг арилгаад, кодонд байгаа үндсэн жагсаалтыг сэргээх үү?'))return;try{localStorage.removeItem(KEY)}catch(e){}L=clone(initialData);if(sb)pushAll(L);render()};
+document.addEventListener('click',e=>{const ed=e.target.closest('[data-edit]');if(ed){e.stopPropagation();add(L.find(l=>l.id===ed.dataset.edit));return}const d=e.target.closest('[data-del]');if(d){e.stopPropagation();del(d.dataset.del);return}const i=e.target.closest('[data-id]');if(i)open(i.dataset.id)});
 document.addEventListener('keydown',e=>{if(e.key==='Escape')close();
 if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();if(!admin)login()}
 if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('fr'))open(e.target.dataset.id)});
 window.go=id=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
-render();
+render();if(sb){pull();sb.auth.getSession().then(({data})=>{admin=!!data.session;render()});sb.auth.onAuthStateChange((_e,t)=>{admin=!!t;render()});sb.channel('lessons').on('postgres_changes',{event:'*',schema:'public',table:'lessons'},pull).subscribe()}
 })();
 </script></body></html>
