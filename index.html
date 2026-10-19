@@ -100,7 +100,7 @@ const SEED=[
 {id:'b4',type:'b',title:'Пост-колониализм',sub:'Сайд, Бабха',video:'',notes:'',cites:''}];
 let L;try{L=JSON.parse(localStorage.getItem(KEY))}catch(e){}
 if(!Array.isArray(L))L=SEED.map(x=>({...x}));
-const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){}};
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){alert('Хадгалах зай дүүрсэн байна. Жижиг зураг ашиглана уу.')}};
 const $=s=>document.querySelector(s);
 const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const ready=x=>!!(x.video||x.notes);
@@ -135,13 +135,18 @@ function add(){if(!admin)return;const o=modal(`<h3>Хичээл нэмэх</h3>
 <label for="a2">Төрөл</label><select id="a2"><option value="t">Цаг хугацааны үе</option><option value="b">Онол</option></select>
 <label for="a3">Үе / зохиогч</label><input id="a3">
 <label for="a4">YouTube холбоос эсвэл MP4</label><input id="a4" type="url">
-<label for="a5">Зургийн холбоос (thumbnail)</label><input id="a5" type="url">
+<label for="a8">Зураг оруулах (төхөөрөмжөөс)</label><input id="a8" type="file" accept="image/*">
+<label for="a5">Эсвэл зургийн холбоос (заавал биш)</label><input id="a5" type="url">
 <label for="a6">Хичээлийн тойм</label><textarea id="a6"></textarea>
 <label for="a7">Эх сурвалж (мөр бүрт нэг)</label><textarea id="a7"></textarea>
 <div class="acts"><button id="c">Болих</button><button id="ok">Нийтлэх</button></div>`);
 o.querySelector('#c').onclick=close;
 o.querySelector('#ok').onclick=()=>{const v=i=>o.querySelector('#a'+i).value.trim();if(!v(1)){o.querySelector('#a1').focus();return}
-L.push({id:'n'+Date.now(),type:v(2),title:v(1),sub:v(3),video:v(4),img:v(5),notes:v(6),cites:v(7),h:Math.floor(Math.random()*360)});save();close();render()}}
+const y=v(4).match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+const fin=img=>{L.push({id:'n'+Date.now(),type:v(2),title:v(1),sub:v(3),video:v(4),img:img||v(5)||(y?'https://img.youtube.com/vi/'+y[1]+'/hqdefault.jpg':''),notes:v(6),cites:v(7),h:Math.floor(Math.random()*360)});save();close();render()};
+const f=o.querySelector('#a8').files[0];
+if(!f){fin('');return}
+const r=new FileReader();r.onload=()=>{const im=new Image();im.onload=()=>{const s=Math.min(1,900/Math.max(im.width,im.height)),c=document.createElement('canvas');c.width=Math.round(im.width*s);c.height=Math.round(im.height*s);c.getContext('2d').drawImage(im,0,0,c.width,c.height);fin(c.toDataURL('image/jpeg',.85))};im.onerror=()=>fin(r.result);im.src=r.result};r.readAsDataURL(f)}}
 $('#login').onclick=login;$('#addBtn').onclick=add;
 $('#logout').onclick=()=>{admin=false;try{sessionStorage.removeItem('ah_admin')}catch(e){}render()};
 $('#exp').onclick=()=>{const t=JSON.stringify(L);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>alert('Хуулагдлаа.')).catch(()=>prompt('Хуулна уу:',t))};
