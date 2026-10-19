@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="mn"><head><meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Урлагийн түүхийн боловсрол</title>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@500;600&family=Playfair+Display:wght@600;700&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{color-scheme:dark;--wall:#151413;--brass:#B59B63;--cream:#E6DFD3;--wood:#3D2616;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+html{scroll-padding-top:env(safe-area-inset-top,0px);scroll-behavior:smooth}
+*{box-sizing:inherit}
+body{margin:0;background:var(--wall);color:var(--cream);font:400 15px/1.6 Inter,system-ui,sans-serif;min-height:100vh}
+body::before{content:"";position:fixed;inset:0;background:radial-gradient(ellipse at 50% 20%,rgba(254,234,154,.07),transparent 55%),radial-gradient(ellipse at center,transparent 45%,rgba(0,0,0,.6));pointer-events:none;z-index:0}
+main,header,footer{position:relative;z-index:1}
+header{display:flex;flex-wrap:wrap;gap:20px;justify-content:space-between;align-items:flex-end;padding:40px 5vw 10px}
+h1{font:500 clamp(34px,5vw,58px)/1.05 "Cormorant Garamond",Georgia,serif;margin:0;max-width:11em}
+nav{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+button{font:inherit;color:var(--cream);background:none;border:1px solid rgba(181,155,99,.35);padding:8px 16px;cursor:pointer;transition:border-color .2s,color .2s}
+button:hover,button:focus-visible{border-color:var(--brass);color:var(--brass)}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--brass);outline-offset:2px}
+.adm{display:none!important}body.admin .adm{display:inline-flex!important}
+.badge{color:var(--brass);font-size:13px;gap:10px;align-items:center}
+h2{font:500 26px "Cormorant Garamond",serif;margin:0 0 4px;color:var(--brass)}
+section{padding:50px 5vw 20px}
+.sub{margin:0 0 30px;opacity:.6;font-size:14px}
+/* wall */
+#wall{display:grid;grid-template-columns:repeat(auto-fill,minmax(220px,1fr));gap:44px 36px;align-items:center;max-height:1500px;overflow-y:auto;padding:20px 12px 30px;scrollbar-color:#3D2616 transparent}
+.fr{position:relative;text-align:center;cursor:pointer;transition:transform .3s;background:none;border:0;padding:0;color:inherit}
+.fr:nth-child(5n+2){margin-top:30px}.fr:nth-child(5n+4){margin-top:-20px}
+.fr:hover,.fr:focus-visible{transform:translateY(-6px);color:inherit}
+.frame{position:relative;padding:16px;background:#4a3118;box-shadow:0 20px 40px rgba(0,0,0,.65),inset 0 0 0 2px #2a1a0a,inset 0 0 0 4px #7d5724,inset 0 0 0 7px #3a2410,inset 0 0 0 9px #a8742d,inset 0 0 0 12px #52361a,inset 0 0 0 14px #1a0f07}
+.fr:nth-child(5n+2) .frame{padding:22px;background:#4a3118;box-shadow:0 20px 40px rgba(0,0,0,.65),inset 0 0 0 2px #a8946a,inset 0 0 0 6px #d6c79f,inset 0 0 0 8px #1c1308,inset 0 0 0 12px #c0ac7e,inset 0 0 0 14px #1c1308,inset 0 0 0 19px #5a3d1a}
+
+.frame::after{content:"";position:absolute;inset:-30px -20px -10px;background:radial-gradient(ellipse at 50% 0,rgba(254,234,154,.3),transparent 65%);opacity:0;transition:opacity .35s;pointer-events:none}
+.fr:hover .frame::after,.fr:focus-visible .frame::after{opacity:1}
+.art{aspect-ratio:var(--r);background-size:cover;background-position:center;box-shadow:inset 0 0 40px rgba(0,0,0,.45),0 0 0 2px #b87a30,0 0 0 3px #1a0f07;display:grid;place-items:center;margin:0}
+.fr:nth-child(5n+1){--r:.78}.fr:nth-child(5n+2){--r:1.45}.fr:nth-child(5n+3){--r:1}.fr:nth-child(5n+4){--r:.8}.fr:nth-child(5n){--r:1.3}
+.art svg{width:34%;opacity:.4}
+.plate{margin-top:14px}.plate b{display:block;font:500 20px "Cormorant Garamond",serif}
+.plate small{display:block;opacity:.65;font-size:12px}
+.st{font-size:11px;color:var(--brass)}.st.soon{opacity:.5;color:var(--cream)}
+.del{position:absolute;top:-8px;right:-8px;z-index:3;background:#2a0e0e;padding:4px 9px;font-size:12px;opacity:0;transition:opacity .2s}
+.fr:hover .del,.bk:hover .del,.del:focus-visible{opacity:1}
+/* books */
+#shelf{display:flex;gap:56px;align-items:flex-end;overflow-x:auto;padding:30px 40px 0;justify-content:center;min-height:200px}
+.stack{display:flex;flex-direction:column-reverse;flex:none}
+.bk{position:relative;display:flex;flex-direction:column;justify-content:center;min-height:48px;max-height:64px;height:58px;padding:0 44px;text-align:left;writing-mode:horizontal-tb;border:0;border-radius:4px 4px 2px 2px;box-shadow:0 10px 25px rgba(0,0,0,.5);transition:transform .25s,box-shadow .25s;margin-top:-1px}
+.bk::before,.bk::after{content:"";position:absolute;top:8px;bottom:8px;width:4px;border:solid currentColor;border-width:0 1px;opacity:.5}
+.bk::before{left:16px}.bk::after{right:16px}
+.bk:hover,.bk:focus-visible{transform:translateY(-4px) scale(1.02);box-shadow:0 12px 30px rgba(0,0,0,.6),0 0 28px rgba(254,234,154,.25);z-index:2}
+.bk b{font:700 22px/1.1 "Playfair Display",Georgia,serif;white-space:nowrap;text-transform:uppercase;overflow:hidden;text-overflow:ellipsis;max-width:100%}
+.bk small{font-size:10px;opacity:.7;text-transform:uppercase}
+.beam{height:26px;margin:0 3vw;background:linear-gradient(#5b3a1d,#3d2616 40%,#24150a);box-shadow:0 14px 30px rgba(0,0,0,.7),inset 0 2px 0 rgba(255,220,160,.15)}
+.empty{opacity:.5;padding:30px}
+footer{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;padding:40px 5vw 30px;font-size:13px;opacity:.7}
+footer button{border:0;padding:0;font-size:12px;opacity:.6}
+/* modal */
+.ov{position:fixed;inset:0;z-index:50;background:rgba(5,4,3,.82);display:grid;place-items:center;padding:16px;overflow-y:auto;animation:f .2s}
+@keyframes f{from{opacity:0}}
+.md{background:#1b1917;border:1px solid rgba(181,155,99,.3);width:min(760px,100%);padding:26px;box-shadow:0 30px 80px #000;max-height:94vh;overflow-y:auto}
+.md h3{font:500 30px/1.1 "Cormorant Garamond",serif;margin:0}
+.meta{color:var(--brass);font-size:13px;margin:4px 0 16px}
+.vid{aspect-ratio:16/9;background:#0d0c0b;display:grid;place-items:center;margin-bottom:18px;opacity:.95}
+.vid iframe,.vid video{width:100%;height:100%;border:0}
+.md h4{font:500 20px "Cormorant Garamond",serif;color:var(--brass);margin:18px 0 6px}
+.md ol{padding-left:20px;margin:0;font-size:14px}.md li{margin-bottom:6px}
+.md a{color:var(--brass);word-break:break-all}
+.acts{display:flex;justify-content:flex-end;gap:10px;margin-top:22px}
+.danger{border-color:#7a2a2a;color:#d9a0a0}
+label{display:block;font-size:13px;margin:12px 0 4px;opacity:.8}
+input,select,textarea{width:100%;font:inherit;color:var(--cream);background:#0f0e0d;border:1px solid rgba(181,155,99,.3);padding:9px 10px}
+textarea{min-height:80px;resize:vertical}
+@media(max-width:600px){.bk{padding:0 32px}.bk b{font-size:17px}.bk::before{left:10px}.bk::after{right:10px}#shelf{justify-content:flex-start;padding-inline:16px}}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+</style></head><body>
+<header>
+<h1>Урлагийн түүхийн боловсрол</h1>
+<nav>
+<button onclick="go('wall')">Цаг хугацааны дараалал</button>
+<button onclick="go('shelf-s')">Онолууд</button>
+<button class="adm" id="addBtn">+ Хичээл нэмэх</button>
+<span class="badge adm">Админ горим <button id="logout">Гарах</button><button id="exp">Хуулах</button></span>
+</nav></header>
+<main>
+<section><h2>Цаг хугацааны дараалал</h2><p class="sub">Үе бүрийн хичээлийг үзэхийн тулд зургийг дарна уу.</p><div id="wall"></div></section>
+<section id="shelf-s"><h2>Онолууд</h2><p class="sub">Шүүмжлэлт онолын хичээлүүд. Ном дээр дарна уу.</p><div id="shelf"></div><div class="beam"></div></section>
+</main>
+<footer><span>Эх сурвалж ба Ном зүй: хичээл бүрийн дотор</span><span>Үнэгүй нээлттэй боловсролын платформ <button id="login">Админ нэвтрэх</button></span></footer>
+<script>
+(()=>{
+const PASS='arthistory2026',KEY='ah_lessons_v1';
+let admin=false;
+try{admin=sessionStorage.getItem('ah_admin')==='1'}catch(e){}
+const SEED=[
+{id:'s1',type:'t',title:'Умард Ренессанс',sub:'XV–XVI зуун • Ян ван Эйк',h:8,video:'',notes:'Нидерланд, Фландрийн зураачид тосон будгийн нарийн техникээр бодит байдлыг зураг дээр шингээсэн үе. Ян ван Эйкийн хөрөг, гэрэл, материаллаг байдлын дүрслэл гол сэдэв.',cites:'Panofsky, Erwin. Early Netherlandish Painting. Cambridge, MA: Harvard University Press, 1953.\nCampbell, Lorne. The Fifteenth Century Netherlandish Paintings. London: National Gallery, 1998.'},
+{id:'s2',type:'t',title:'Италийн Ренессанс',sub:'XIV–XVI зуун • Леонардо да Винчи',h:40,video:'',notes:'Хүмүүнлэгийн үзэл, шугаман перспектив, анатоми судлал, эртний сонгодог өвийг сэргээсэн үе.',cites:'Burckhardt, Jacob. The Civilization of the Renaissance in Italy. 1860.\nBaxandall, Michael. Painting and Experience in Fifteenth-Century Italy. Oxford: Oxford University Press, 1972.\nGombrich, E. H. The Story of Art. London: Phaidon, 1950.'},
+{id:'s3',type:'t',title:'Дорнод урлагийн түүх',sub:'Укиё-э • Хокусай',h:210,video:'',notes:'',cites:''},
+{id:'s4',type:'t',title:'Монгол урлагийн түүх',sub:'Монгол зураг, уламжлал',h:25,video:'',notes:'',cites:''},
+{id:'b1',type:'b',title:'Феминизм',sub:'Феминист урлагийн түүх',video:'',notes:'Урлагийн түүхийн канонд эмэгтэйчүүд яагаад харагдахгүй байсныг феминист шүүмжлэл асуудаг.',cites:'Nochlin, Linda. “Why Have There Been No Great Women Artists?” ARTnews 69, no. 9 (1971): 22–39.'},
+{id:'b2',type:'b',title:'Марксизм',sub:'Урлаг ба нийгмийн харилцаа',video:'',notes:'Урлагийг үйлдвэрлэлийн харилцаа, анги, үзэл суртлын хүрээнд тайлбарладаг онол.',cites:'Berger, John. Ways of Seeing. London: BBC and Penguin, 1972.\nClark, T. J. Image of the People. London: Thames & Hudson, 1973.'},
+{id:'b3',type:'b',title:'Пьер Бурдье',sub:'Тоо, амт, соёлын капитал',video:'',notes:'Урлагийн амт сонирхол нийгмийн байр суурийг хэрхэн ялган тэмдэглэдгийг Бурдье тайлбарласан.',cites:'Bourdieu, Pierre. Distinction: A Social Critique of the Judgement of Taste. Cambridge, MA: Harvard University Press, 1984.'},
+{id:'b4',type:'b',title:'Пост-колониализм',sub:'Сайд, Бабха',video:'',notes:'',cites:''}];
+let L;try{L=JSON.parse(localStorage.getItem(KEY))}catch(e){}
+if(!Array.isArray(L))L=SEED.map(x=>({...x}));
+const save=()=>{try{localStorage.setItem(KEY,JSON.stringify(L))}catch(e){}};
+const $=s=>document.querySelector(s);
+const esc=s=>String(s||'').replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+const ready=x=>!!(x.video||x.notes);
+const st=x=>ready(x)?'<span class="st">Үзэх</span>':'<span class="st soon">Удахгүй</span>';
+const delBtn=id=>`<span class="del adm" role="button" tabindex="0" data-del="${id}" aria-label="Усгах">Усгах</span>`;
+const temple='<svg viewBox="0 0 40 40" fill="none" stroke="#B59B63" stroke-width="1.5"><path d="M4 14 20 5l16 9zM9 18v14M16 18v14M24 18v14M31 18v14M4 35h32"/></svg>';
+const COL=[['#4a1212','#d4af37'],['#1f2e1f','#d4af37'],['#171717','#F5EBE0'],['#d9cdb8','#171717'],['#2c1d11','#d9cdb8']];
+function render(){
+document.body.classList.toggle('admin',admin);
+const T=L.filter(x=>x.type==='t'),B=L.filter(x=>x.type==='b');
+$('#wall').innerHTML=T.length?T.map(f=>`<div class="fr" data-id="${f.id}" tabindex="0" role="button">${delBtn(f.id)}<div class="frame"><div class="art" data-img="${esc(f.img)}" style="background-image:radial-gradient(ellipse at 30% 25%,hsl(${f.h||30} 35% 38%),hsl(${(f.h||30)+25} 30% 14%) 80%)">${f.img?'':temple}</div></div><div class="plate"><b>${esc(f.title)}</b><small>${esc(f.sub)}</small>${st(f)}</div></div>`).join(''):'<p class="empty">Хичээл алга.</p>';
+document.querySelectorAll('.art[data-img]').forEach(a=>{if(a.dataset.img)a.style.backgroundImage='url('+JSON.stringify(a.dataset.img)+')'});
+let h='';for(let i=0;i<B.length;i+=5){h+='<div class="stack">'+B.slice(i,i+5).map((b,j)=>{const c=COL[(i+j)%5],k=i+j;return `<button class="bk" data-id="${b.id}" style="background:linear-gradient(#ffffff10,#0000002a),${c[0]};color:${c[1]};width:${280+(k%3)*34}px;margin-left:${((k*37)%5-2)*9}px">${delBtn(b.id)}<b>${esc(b.title)}</b><small>${esc(b.sub)} ${ready(b)?'• Үзэх':'• Удахгүй'}</small></button>`}).join('')+'</div>'}
+$('#shelf').innerHTML=h||'<p class="empty">Ном алга.</p>';}
+function embed(u){if(!u)return'<span>Видео удахгүй</span>';
+const m=u.match(/(?:youtu\.be\/|v=|embed\/)([\w-]{11})/);
+if(m)return`<iframe src="https://www.youtube.com/embed/${m[1]}" allowfullscreen title="Видео"></iframe>`;
+if(/\.(mp4|webm)(\?|$)/i.test(u))return`<video controls src="${esc(u)}"></video>`;
+return`<a href="${esc(u)}" target="_blank" rel="noopener">Видео нээх</a>`}
+function modal(html){close();const o=document.createElement('div');o.className='ov';o.innerHTML=`<div class="md" role="dialog" aria-modal="true">${html}</div>`;o.onclick=e=>{if(e.target===o)close()};document.body.appendChild(o);const f=o.querySelector('input,button');if(f)f.focus();return o}
+function close(){document.querySelectorAll('.ov').forEach(o=>o.remove())}
+function open(id){const x=L.find(l=>l.id===id);if(!x)return;
+const cites=x.cites?'<ol>'+x.cites.split('\n').filter(s=>s.trim()).map(s=>'<li>'+esc(s).replace(/(https?:\/\/[^\s<]+)/g,'<a href="$1" target="_blank" rel="noopener">$1</a>')+'</li>').join('')+'</ol>':'<p style="opacity:.6">Удахгүй нэмэгдэнэ.</p>';
+const o=modal(`<h3>${esc(x.title)}</h3><div class="meta">${x.type==='t'?'Цаг хугацааны дараалал':'Онол'} • ${esc(x.sub)}</div><div class="vid">${embed(x.video)}</div><h4>Тойм</h4><p>${esc(x.notes)||'<span style="opacity:.6">Удахгүй нэмэгдэнэ.</span>'}</p><h4>Эх сурвалж</h4>${cites}<div class="acts"><button class="danger adm" id="mdel">Усгах</button><button id="mclose">Хаах</button></div>`);
+o.querySelector('#mclose').onclick=close;o.querySelector('#mdel').onclick=()=>del(id)}
+function del(id){if(!admin)return;if(!confirm('Та энэ хичээлийг устгахдаа итгэлтэй байна уу?'))return;L=L.filter(l=>l.id!==id);save();close();render()}
+function login(){const o=modal(`<h3>Админ нэвтрэх</h3><label for="pw">Админ нууц үгээ оруулна уу:</label><input id="pw" type="password" autocomplete="off"><p id="err" style="color:#d9a0a0;font-size:13px;margin:8px 0 0"></p><div class="acts"><button id="c">Болих</button><button id="ok">Нэвтрэх</button></div>`);
+const go=()=>{if(o.querySelector('#pw').value===PASS){admin=true;try{sessionStorage.setItem('ah_admin','1')}catch(e){}close();render()}else o.querySelector('#err').textContent='Нууц үг буруу байна.'};
+o.querySelector('#ok').onclick=go;o.querySelector('#c').onclick=close;o.querySelector('#pw').onkeydown=e=>{if(e.key==='Enter')go()}}
+function add(){if(!admin)return;const o=modal(`<h3>Хичээл нэмэх</h3>
+<label for="a1">Гарчиг</label><input id="a1">
+<label for="a2">Төрөл</label><select id="a2"><option value="t">Цаг хугацааны үе</option><option value="b">Онол</option></select>
+<label for="a3">Үе / зохиогч</label><input id="a3">
+<label for="a4">YouTube холбоос эсвэл MP4</label><input id="a4" type="url">
+<label for="a5">Зургийн холбоос (thumbnail)</label><input id="a5" type="url">
+<label for="a6">Хичээлийн тойм</label><textarea id="a6"></textarea>
+<label for="a7">Эх сурвалж (мөр бүрт нэг)</label><textarea id="a7"></textarea>
+<div class="acts"><button id="c">Болих</button><button id="ok">Нийтлэх</button></div>`);
+o.querySelector('#c').onclick=close;
+o.querySelector('#ok').onclick=()=>{const v=i=>o.querySelector('#a'+i).value.trim();if(!v(1)){o.querySelector('#a1').focus();return}
+L.push({id:'n'+Date.now(),type:v(2),title:v(1),sub:v(3),video:v(4),img:v(5),notes:v(6),cites:v(7),h:Math.floor(Math.random()*360)});save();close();render()}}
+$('#login').onclick=login;$('#addBtn').onclick=add;
+$('#logout').onclick=()=>{admin=false;try{sessionStorage.removeItem('ah_admin')}catch(e){}render()};
+$('#exp').onclick=()=>{const t=JSON.stringify(L);(navigator.clipboard?navigator.clipboard.writeText(t):Promise.reject()).then(()=>alert('Хуулагдлаа.')).catch(()=>prompt('Хуулна уу:',t))};
+document.addEventListener('click',e=>{const d=e.target.closest('[data-del]');if(d){e.stopPropagation();del(d.dataset.del);return}const i=e.target.closest('[data-id]');if(i)open(i.dataset.id)});
+document.addEventListener('keydown',e=>{if(e.key==='Escape')close();
+if((e.ctrlKey||e.metaKey)&&e.shiftKey&&e.key.toLowerCase()==='a'){e.preventDefault();if(!admin)login()}
+if(e.key==='Enter'&&e.target.classList&&e.target.classList.contains('fr'))open(e.target.dataset.id)});
+window.go=id=>document.getElementById(id).scrollIntoView({behavior:'smooth'});
+render();
+})();
+</script></body></html>
